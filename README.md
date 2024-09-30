@@ -104,11 +104,71 @@ coding sequences (CDS) annotated by Prokka. Are the total number of
 genes the same as they were with prodigal? What are the differences?
 
 ```shell
-# to install Prokka
-brew install prokka
-# creat a shell script
-nano run_prokka_genomes.sh
+# Create a temporary directory for output files
+mkdir -p tmp
+# Load the Prokka module
+module load prokka
+# Find all .fna files in the current directory and its subdirectories
+find . -name "*.fna" -type f | while read fna_file; do
+    # Extract the file name without the path (basename)
+    filename=$(basename "$fna_file")
+    # Generate the corresponding .gff file path and place it in the tmp directory
+    gff_file="tmp/${filename%.fna}.gff"
+    # Run Prokka to generate the .gff file
+    prokka --outdir tmp --force --prefix "${filename%.fna}" "$fna_file" > /dev/null 2>&1
+    # Count the number of CDS in the .gff file
+    cds_count=$(grep -c CDS "$gff_file")
+    # Print the result
+    echo "File: $gff_file, CDS Count: $cds_count"
+done
 
+```
+Answer
+```text
+Loading module for Prokka
+Prokka 1.14.6 modules now loaded
+File: tmp/GCA_000006745.1_ASM674v1_genomic.gff, CDS Count: 3589
+File: tmp/GCA_000007125.1_ASM712v1_genomic.gff, CDS Count: 3150
+File: tmp/GCA_000008565.1_ASM856v1_genomic.gff, CDS Count: 3245
+File: tmp/GCA_000008725.1_ASM872v1_genomic.gff, CDS Count: 892
+File: tmp/GCA_000027305.1_ASM2730v1_genomic.gff, CDS Count: 1748
+File: tmp/GCA_000006825.1_ASM682v1_genomic.gff, CDS Count: 2028
+File: tmp/GCA_000008525.1_ASM852v1_genomic.gff, CDS Count: 1577
+File: tmp/GCA_000008605.1_ASM860v1_genomic.gff, CDS Count: 1001
+File: tmp/GCA_000008745.1_ASM874v1_genomic.gff, CDS Count: 1058
+File: tmp/GCA_000091085.2_ASM9108v2_genomic.gff, CDS Count: 1056
+File: tmp/GCA_000006865.1_ASM686v1_genomic.gff, CDS Count: 2383
+File: tmp/GCA_000008545.1_ASM854v1_genomic.gff, CDS Count: 1861
+File: tmp/GCA_000008625.1_ASM862v1_genomic.gff, CDS Count: 1771
+File: tmp/GCA_000008785.1_ASM878v1_genomic.gff, CDS Count: 1504
+```
+## Q5
+Extract and list all unique gene names annotated by Prokka
+using shell commands. Provide the command you used and the first five
+gene names from the list
 
+```shell
+# Search for lines containing "gene=" in all .gff files in the tmp directory
+grep "gene=" tmp/*.gff |
+# Use awk to split the line by 'gene=' and print the part after 'gene='
+awk -F 'gene=' '{if ($2) print $2}' |
+# Use awk again to split by ';' and print only the gene name (the part before the semicolon)
+awk -F ';' '{print $1}' |
+# Sort the gene names alphabetically
+sort |
+# Remove duplicate gene names
+uniq |
+# Display the first 5 unique gene names
+head -n 5
+```
+Answer
+```text
 
+NEW
+
+aaaT
+aaeA
+aaeA_1
+aaeA_2
+aaeB
 ```
