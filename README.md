@@ -57,6 +57,12 @@ nano find_highest_genome.sh
 
 #to print the highest gene
 cat gene_counts14.txt | sort -k2 -n | tail -n 1
+
+note :
+-i specifies the input genome file,
+-o specifies the output results file,
+-a saves the amino acid sequences of the predicted genes, and
+-d saves the nucleotide sequences of the predicted genes.
 ```
 
 Answer
